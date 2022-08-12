@@ -5,25 +5,25 @@
 #Description : This terraform module is designed to generate consistent label names and tags
 #              for resources. You can use terraform-labels to implement a strict naming
 #              convention.
-module "labels" {
-  source  = "clouddrove/labels/aws"
-  version = "0.15.0"
-
-  enabled     = var.enabled
-  name        = var.name
-  repository  = var.repository
-  environment = var.environment
-  managedby   = var.managedby
-  label_order = var.label_order
-  attributes  = var.attributes
-}
+//module "labels" {
+//  source  = "clouddrove/labels/aws"
+//  version = "0.15.0"
+//
+//  enabled     = var.enabled
+//  name        = var.name
+//  repository  = var.repository
+//  environment = var.environment
+//  managedby   = var.managedby
+//  label_order = var.label_order
+//  attributes  = var.attributes
+//}
 
 # Module      : Api Gateway
 # Description : Terraform module to create Api Gateway resource on AWS for creatng api.
 resource "aws_api_gateway_rest_api" "default" {
   count = var.enabled ? 1 : 0
 
-  name                     = module.labels.id
+  name                     = var.name
   description              = var.description
   binary_media_types       = var.binary_media_types
   minimum_compression_size = var.minimum_compression_size
@@ -128,7 +128,6 @@ resource "aws_api_gateway_integration_response" "default" {
 }
 
 resource "aws_api_gateway_method" "options_method" {
-  count         = length(var.path_parts) > 0 ? length(var.path_parts) : 0
   rest_api_id   = aws_api_gateway_rest_api.default.*.id[0]
   resource_id   = aws_api_gateway_resource.default.*.id[count.index]
   http_method   = "OPTIONS"

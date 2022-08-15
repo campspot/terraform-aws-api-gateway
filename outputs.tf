@@ -14,3 +14,11 @@ output "tags" {
   value       = module.labels.tags
   description = "A mapping of tags to assign to the resource."
 }
+
+output "dev_stage_name" {
+  value =  aws_api_gateway_stage.default.0.stage_name
+}
+
+output "stg_stage_name" {
+  value =  aws_api_gateway_stage.default.1.stage_name
+}

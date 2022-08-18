@@ -5,18 +5,17 @@
 #Description : This terraform module is designed to generate consistent label names and tags
 #              for resources. You can use terraform-labels to implement a strict naming
 #              convention.
-//module "labels" {
-//  source  = "clouddrove/labels/aws"
-//  version = "0.15.0"
-//
-//  enabled     = var.enabled
-//  name        = var.name
-//  repository  = var.repository
-//  environment = var.environment
-//  managedby   = var.managedby
-//  label_order = var.label_order
-//  attributes  = var.attributes
-//}
+module "labels" {
+  source  = "clouddrove/labels/aws"
+  version = "0.15.0"
+
+  enabled     = var.enabled
+  repository  = var.repository
+  environment = var.environment
+  managedby   = var.managedby
+  label_order = var.label_order
+  attributes  = var.attributes
+}
 
 # Module      : Api Gateway
 # Description : Terraform module to create Api Gateway resource on AWS for creatng api.
@@ -125,63 +124,6 @@ resource "aws_api_gateway_integration_response" "default" {
   response_parameters = length(var.integration_response_parameters) > 0 ? element(var.integration_response_parameters, count.index) : {}
   response_templates  = length(var.response_templates) > 0 ? element(var.response_templates, count.index) : {}
   content_handling    = length(var.response_content_handlings) > 0 ? element(var.response_content_handlings, count.index) : null
-}
-
-resource "aws_api_gateway_method" "options_method" {
-  rest_api_id   = aws_api_gateway_rest_api.default.*.id[0]
-  resource_id   = aws_api_gateway_resource.default.*.id[count.index]
-  http_method   = "OPTIONS"
-  authorization = "NONE"
-}
-
-resource "aws_api_gateway_method_response" "options_200" {
-  count       = length(aws_api_gateway_method.default.*.id)
-  rest_api_id = aws_api_gateway_rest_api.default.*.id[0]
-  resource_id = aws_api_gateway_resource.default.*.id[count.index]
-  http_method = aws_api_gateway_method.options_method.*.http_method[count.index]
-  status_code = "200"
-
-  response_models = { "application/json" = "Empty" }
-
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin"      = true
-    "method.response.header.Access-Control-Allow-Headers"     = true
-    "method.response.header.Access-Control-Allow-Methods"     = true
-    "method.response.header.Access-Control-Allow-Credentials" = true
-  }
-
-  depends_on = [aws_api_gateway_method.options_method]
-}
-
-resource "aws_api_gateway_integration" "options_integration" {
-  count       = length(aws_api_gateway_method.default.*.id)
-  rest_api_id = aws_api_gateway_rest_api.default.*.id[0]
-  resource_id = aws_api_gateway_resource.default.*.id[count.index]
-  http_method = aws_api_gateway_method.options_method.*.http_method[count.index]
-
-  type             = "MOCK"
-  content_handling = "CONVERT_TO_TEXT"
-
-  depends_on = [aws_api_gateway_method.options_method]
-}
-
-resource "aws_api_gateway_integration_response" "options_integration_response" {
-  count       = length(aws_api_gateway_integration.options_integration.*.id)
-  rest_api_id = aws_api_gateway_rest_api.default.*.id[0]
-  resource_id = aws_api_gateway_resource.default.*.id[count.index]
-  http_method = aws_api_gateway_method.options_method.*.http_method[count.index]
-  status_code = aws_api_gateway_method_response.options_200.*.status_code[count.index]
-
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'"
-    "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,DELETE,GET,HEAD,PATCH,POST,PUT'"
-  }
-
-  depends_on = [
-    aws_api_gateway_method_response.options_200,
-    aws_api_gateway_integration.options_integration,
-  ]
 }
 
 # Module      : Api Gateway Deployment

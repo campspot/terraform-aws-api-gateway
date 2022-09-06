@@ -231,3 +231,37 @@ resource "aws_api_gateway_api_key" "default" {
   enabled     = length(var.enableds) > 0 ? element(var.enableds, count.index) : true
   value       = length(var.values) > 0 ? element(var.values, count.index) : null
 }
+
+# Domain name
+resource "aws_apigateway_domain_name" "this" {
+  count = var.create_api_domain_name ? 1 : 0
+
+  domain_name = var.domain_name
+
+  domain_name_configuration {
+    certificate_arn                        = var.domain_name_certificate_arn
+    ownership_verification_certificate_arn = var.domain_name_ownership_verification_certificate_arn
+    endpoint_type                          = "REGIONAL"
+    security_policy                        = "TLS_1_2"
+  }
+
+  dynamic "mutual_tls_authentication" {
+    for_each = length(keys(var.mutual_tls_authentication)) == 0 ? [] : [var.mutual_tls_authentication]
+
+    content {
+      truststore_uri     = mutual_tls_authentication.value.truststore_uri
+      truststore_version = try(mutual_tls_authentication.value.truststore_version, null)
+    }
+  }
+
+  tags = merge(var.domain_name_tags, var.tags)
+}
+
+# Default API mapping
+resource "aws_apigateway_api_mapping" "this" {
+  count = var.create_api_domain_name ? 1 : 0
+
+  api_id      = aws_api_gateway_rest_api.default.*.id[0]
+  domain_name = aws_apigateway_domain_name.this[0].id
+  stage       = var.stage_name
+}

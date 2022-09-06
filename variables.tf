@@ -574,3 +574,40 @@ variable "model_schemas" {
   default     = []
   description = "The schema of the model in a JSON form."
 }
+
+variable "create_api_domain_name" {
+  description = "Whether to create API domain name resource"
+  type        = bool
+  default     = true
+}
+
+# domain name
+variable "domain_name" {
+  description = "The domain name to use for API gateway"
+  type        = string
+  default     = null
+}
+
+variable "domain_name_certificate_arn" {
+  description = "The ARN of an AWS-managed certificate that will be used by the endpoint for the domain name"
+  type        = string
+  default     = null
+}
+
+variable "domain_name_ownership_verification_certificate_arn" {
+  description = "ARN of the AWS-issued certificate used to validate custom domain ownership (when certificate_arn is issued via an ACM Private CA or mutual_tls_authentication is configured with an ACM-imported certificate.)"
+  type        = string
+  default     = null
+}
+
+variable "domain_name_tags" {
+  description = "A mapping of tags to assign to API domain name resource."
+  type        = map(string)
+  default     = {}
+}
+
+variable "mutual_tls_authentication" {
+  description = "An Amazon S3 URL that specifies the truststore for mutual TLS authentication as well as version, keyed at uri and version"
+  type        = map(string)
+  default     = {}
+}

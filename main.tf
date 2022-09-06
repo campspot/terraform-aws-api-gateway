@@ -236,9 +236,9 @@ resource "aws_api_gateway_api_key" "default" {
 resource "aws_api_gateway_domain_name" "this" {
   count = var.create_api_domain_name ? 1 : 0
 
-  domain_name = var.domain_name
-  certificate_arn                        = var.domain_name_certificate_arn
-  security_policy                        = "TLS_1_2"
+  domain_name     = var.domain_name
+  certificate_arn = var.domain_name_certificate_arn
+  security_policy = "TLS_1_2"
 
 
   dynamic "mutual_tls_authentication" {
@@ -255,9 +255,9 @@ resource "aws_api_gateway_domain_name" "this" {
 
 # Default API mapping
 resource "aws_api_gateway_base_path_mapping" "this" {
-  count = var.enabled && var.stage_enabled && var.create_api_domain_name ? 1 : 0
+  count = var.stage_enabled && var.create_api_domain_name ? 1 : 0
 
-  api_id      = aws_api_gateway_rest_api.default.*.id[0]
+  api_id      = var.api_id
   domain_name = aws_api_gateway_domain_name.this[0].id
   stage_name  = var.stage_name
 }

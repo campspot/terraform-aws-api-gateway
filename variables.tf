@@ -6,6 +6,12 @@ variable "name" {
   description = "Name  (e.g. `app` or `cluster`)."
 }
 
+variable "api_id" {
+  type        = string
+  default     = ""
+  description = "The ID of the API."
+}
+
 variable "repository" {
   type        = string
   default     = "https://github.com/clouddrove/terraform-aws-api-gateway"

@@ -233,17 +233,13 @@ resource "aws_api_gateway_api_key" "default" {
 }
 
 # Domain name
-resource "aws_apigateway_domain_name" "this" {
+resource "aws_api_gateway_domain_name" "this" {
   count = var.create_api_domain_name ? 1 : 0
 
   domain_name = var.domain_name
+  certificate_arn                        = var.domain_name_certificate_arn
+  security_policy                        = "TLS_1_2"
 
-  domain_name_configuration {
-    certificate_arn                        = var.domain_name_certificate_arn
-    ownership_verification_certificate_arn = var.domain_name_ownership_verification_certificate_arn
-    endpoint_type                          = "REGIONAL"
-    security_policy                        = "TLS_1_2"
-  }
 
   dynamic "mutual_tls_authentication" {
     for_each = length(keys(var.mutual_tls_authentication)) == 0 ? [] : [var.mutual_tls_authentication]
@@ -258,10 +254,10 @@ resource "aws_apigateway_domain_name" "this" {
 }
 
 # Default API mapping
-resource "aws_apigateway_api_mapping" "this" {
-  count = var.create_api_domain_name ? 1 : 0
+resource "aws_api_gateway_base_path_mapping" "this" {
+  count = var.enabled && var.stage_enabled && var.create_api_domain_name ? 1 : 0
 
   api_id      = aws_api_gateway_rest_api.default.*.id[0]
-  domain_name = aws_apigateway_domain_name.this[0].id
+  domain_name = aws_api_gateway_domain_name.this[0].id
   stage       = var.stage_name
 }
